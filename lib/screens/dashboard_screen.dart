@@ -6,6 +6,8 @@ import '../models/mantenimiento.dart';
 import '../models/equipo.dart';
 import '../utils/app_theme.dart';
 import '../widgets/menu_drawer.dart';
+import '../widgets/mantenimiento_form_dialog.dart';
+import '../screens/historial_avanzado_screen.dart';
 import '../desktop/desktop_layout.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -44,17 +46,20 @@ class _DashboardContent extends StatelessWidget {
     // Obtener todos los mantenimientos programados activos
     final mantenimientosProgramados = dataService.mantenimientosProgramados.where((m) => m.activo).toList();
 
-    // Filtrar mantenimientos pendientes (Vencidos o Próximos)
-    final mantenimientosPendientes = mantenimientosProgramados
-        .where((m) => m.status == MantenimientoStatus.Vencido || m.status == MantenimientoStatus.Proximo)
-        .toList();
+    // Separar mantenimientos vencidos y próximos
+    final vencidos = mantenimientosProgramados
+        .where((m) => m.status == MantenimientoStatus.Vencido)
+        .toList()
+      ..sort((a, b) => (a.horasKmRestante ?? double.maxFinite)
+          .compareTo(b.horasKmRestante ?? double.maxFinite));
 
-    // Ordenar para mostrar vencidos primero, luego por urgencia
-    mantenimientosPendientes.sort((a, b) {
-      if (a.status == MantenimientoStatus.Vencido && b.status != MantenimientoStatus.Vencido) return -1;
-      if (a.status != MantenimientoStatus.Vencido && b.status == MantenimientoStatus.Vencido) return 1;
-      return (a.horasKmRestante ?? double.maxFinite).compareTo(b.horasKmRestante ?? double.maxFinite);
-    });
+    final proximos = mantenimientosProgramados
+        .where((m) => m.status == MantenimientoStatus.Proximo)
+        .toList()
+      ..sort((a, b) => (a.horasKmRestante ?? double.maxFinite)
+          .compareTo(b.horasKmRestante ?? double.maxFinite));
+
+    final mantenimientosPendientes = [...vencidos, ...proximos];
 
     // Calcular estadísticas
     final totalEquipos = dataService.equipos.length;
@@ -79,23 +84,56 @@ class _DashboardContent extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // Sección de mantenimientos pendientes
+          // Sección de mantenimientos vencidos
           Text(
-            'Mantenimientos Pendientes',
+            'Mantenimientos Vencidos',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppColors.error,
+            ),
+          ),
+          const SizedBox(height: 8),
+          vencidos.isEmpty
+              ? _buildEmptyState('No hay mantenimientos vencidos')
+              : Column(
+                  children: vencidos
+                      .map((m) => _buildMantenimientoCard(context, m, dataService))
+                      .toList(),
+                ),
+
+          const SizedBox(height: 24),
+
+          // Sección de mantenimientos próximos
+          Text(
+            'Mantenimientos Próximos',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
               color: AppColors.warning,
             ),
           ),
           const SizedBox(height: 8),
-
-          // Mostrar TODOS los mantenimientos pendientes
-          mantenimientosPendientes.isEmpty
-              ? _buildEmptyState('No hay mantenimientos pendientes')
+          proximos.isEmpty
+              ? _buildEmptyState('No hay mantenimientos próximos')
               : Column(
-            children: mantenimientosPendientes
-                .map((m) => _buildMantenimientoCard(context, m, dataService))
-                .toList(),
+                  children: proximos
+                      .map((m) => _buildMantenimientoCard(context, m, dataService))
+                      .toList(),
+                ),
+
+          const SizedBox(height: 24),
+
+          // Acceso directo al historial
+          Center(
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.history),
+              label: const Text('Ver Historial'),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HistorialAvanzadoScreen()),
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -289,15 +327,7 @@ class _DashboardContent extends StatelessWidget {
                   icon: const Icon(Icons.build),
                   label: const Text('Realizar'),
                   onPressed: () {
-                    // Navegar a la pantalla de realizar mantenimiento
-                    Navigator.pushNamed(
-                      context,
-                      '/realizar-mantenimiento',
-                      arguments: {
-                        'ficha': mantenimiento.ficha,
-                        'idMantenimiento': mantenimiento.id,
-                      },
-                    );
+                    showMantenimientoFormDialog(context, mantenimiento);
                   },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.primaryYellow,
