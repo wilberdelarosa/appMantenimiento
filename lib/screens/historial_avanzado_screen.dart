@@ -369,7 +369,7 @@ class _HistorialAvanzadoScreenState extends State<HistorialAvanzadoScreen> with 
           return _controller.buildInventoryChart(context, movimientos);
         }
       },
-    );
+    );//
   }
 
   Widget _buildStatisticsTab() {
