@@ -1,0 +1,65 @@
+name: alirogroupv01
+description: "Sistema de gestión de mantenimiento para ALITO GROUP SRL."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # UI
+  cupertino_icons: ^1.0.8
+  google_fonts: ^6.1.0
+  fl_chart: ^0.65.0
+
+  # Soporte para escritorio
+  window_size:
+    git:
+      url: https://github.com/google/flutter-desktop-embedding.git
+      path: plugins/window_size
+      ref: main
+
+  # Gestión de estado
+  provider: ^6.0.5
+
+  # Almacenamiento y acceso a archivos
+  path_provider: ^2.1.1
+  shared_preferences: ^2.2.2
+  share_plus: ^7.2.1  # Agregado para compartir archivos
+
+  # Selección de archivos en escritorio y móvil
+  file_selector: ^1.0.1
+  desktop_drop: ^0.4.4  # Para arrastrar y soltar archivos
+
+  # Formateo de fechas y números
+  intl: ^0.18.1  # Cambiado a 0.18.1 para compatibilidad
+
+  # Utilidades
+  uuid: ^4.2.1
+
+  # Supabase (versión base sin autenticación)
+  supabase: ^1.10.25
+
+  # Conectividad
+  connectivity_plus: ^5.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Regular.ttf
+        - asset: assets/fonts/Roboto-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Roboto-Light.ttf
+          weight: 300
