@@ -20,16 +20,16 @@ Future<void> setupDesktopWindow() async {
         final windowWidth = screen.visibleFrame.width * 0.8;
         final windowHeight = screen.visibleFrame.height * 0.8;
 
-        // Establecer tamaño inicial de ventana
-        setWindowMaxSize(Size(windowWidth, windowHeight));
-
         // Centrar la ventana en la pantalla
         final left = (screen.visibleFrame.width - windowWidth) / 2;
         final top = (screen.visibleFrame.height - windowHeight) / 2;
         setWindowFrame(Rect.fromLTWH(left, top, windowWidth, windowHeight));
+
+        // Permitir que la ventana se maximice hasta el tamaño completo de la pantalla
+        setWindowMaxSize(screen.visibleFrame.size);
       } else {
         // Si no se puede obtener información de la pantalla, usar valores predeterminados
-        setWindowMaxSize(const Size(1280, 800));
+        setWindowFrame(const Rect.fromLTWH(0, 0, 1280, 800));
       }
 
       // Establecer título de la ventana
