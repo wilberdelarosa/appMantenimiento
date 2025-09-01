@@ -19,18 +19,6 @@ void main() async {
     print('Error al configurar ventana de escritorio: $e');
   }
 
-  // Forzar orientación vertical solo en dispositivos móviles
-  if (!isDesktop()) {
-    try {
-      await SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-        DeviceOrientation.portraitDown,
-      ]);
-    } catch (e) {
-      print('Error al configurar orientación: $e');
-    }
-  }
-
   // Inicializar servicios
   final dataService = DataService();
   await dataService.init();
@@ -71,10 +59,17 @@ class MyApp extends StatelessWidget {
           themeMode: themeService.isDarkMode ? ThemeMode.dark : ThemeMode.light,
           home: const DashboardScreen(),
           builder: (context, child) {
+            final mediaQuery = MediaQuery.of(context);
+
+            if (!isDesktop()) {
+              // Permitir todas las orientaciones para que la interfaz se reorganice libremente
+              SystemChrome.setPreferredOrientations(DeviceOrientation.values);
+            }
+
             // Aplicar un MediaQuery para asegurar que la UI se adapte correctamente
             return MediaQuery(
               // Establecer el factor de escala de texto a 1.0 para evitar que el texto se escale automáticamente
-              data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+              data: mediaQuery.copyWith(textScaleFactor: 1.0),
               child: child!,
             );
           },
